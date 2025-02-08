@@ -1,9 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'signup.dart';
 import 'home.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  void _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Navigate to HomeScreen after successful login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      _showErrorDialog(e.message ?? "Login failed. Please try again.");
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Error"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,17 +89,19 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
 
-                  _buildTextField(Icons.email, 'Email', TextInputType.emailAddress),
+                  // Email Input Field
+                  _buildTextField(_emailController, Icons.email, 'Email', TextInputType.emailAddress),
                   const SizedBox(height: 20),
 
-                  _buildTextField(Icons.lock, 'Password', TextInputType.text, obscureText: true),
+                  // Password Input Field
+                  _buildTextField(_passwordController, Icons.lock, 'Password', TextInputType.text, obscureText: true),
                   const SizedBox(height: 15),
 
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        // Handle forgot password logic
+                        // Implement forgot password functionality
                       },
                       child: const Text(
                         'Forgot Password?',
@@ -57,6 +111,7 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
+                  // Login Button
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
@@ -66,19 +121,17 @@ class LoginPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomeScreen()),
-                      );
-                    },
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(fontSize: 18),
-                    ),
+                    onPressed: _isLoading ? null : _login,
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            'Login',
+                            style: TextStyle(fontSize: 18),
+                          ),
                   ),
                   const SizedBox(height: 25),
 
+                  // Navigate to Sign Up
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -106,7 +159,8 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(IconData icon, String hintText, TextInputType keyboardType, {bool obscureText = false}) {
+  // Helper method for text fields
+  Widget _buildTextField(TextEditingController controller, IconData icon, String hintText, TextInputType keyboardType, {bool obscureText = false}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -120,6 +174,7 @@ class LoginPage extends StatelessWidget {
         ],
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(
