@@ -11,12 +11,12 @@ class LoginPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: SizedBox(
-          height: MediaQuery.of(context).size.height, // Ensure full screen height
-          child: Center( // Center content vertically
+          height: MediaQuery.of(context).size.height,
+          child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // Prevents excessive spacing
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
@@ -37,15 +37,12 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 40),
 
-                  // Email Field
                   _buildTextField(Icons.email, 'Email', TextInputType.emailAddress),
                   const SizedBox(height: 20),
 
-                  // Password Field
                   _buildTextField(Icons.lock, 'Password', TextInputType.text, obscureText: true),
                   const SizedBox(height: 15),
 
-                  // Forgot Password
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
@@ -60,7 +57,6 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
 
-                  // Login Button (Navigates to HomeScreen)
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
@@ -83,7 +79,6 @@ class LoginPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 25),
 
-                  // Sign-up Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -111,7 +106,6 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  // Helper method to build text fields
   Widget _buildTextField(IconData icon, String hintText, TextInputType keyboardType, {bool obscureText = false}) {
     return Container(
       decoration: BoxDecoration(

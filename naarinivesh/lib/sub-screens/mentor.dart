@@ -57,10 +57,24 @@ class _MentorScreenState extends State<MentorScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mentor', textAlign: TextAlign.center),
+        title: const Text(
+          'Connect with Mentors',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 1.2,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
-        automaticallyImplyLeading: false,
+        elevation: 6,
+        shadowColor: Colors.black45,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
+        ),
       ),
       body: Swiper(
         itemBuilder: (context, index) => Card(
@@ -75,7 +89,6 @@ class _MentorScreenState extends State<MentorScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Profile Picture
                 ClipRRect(
                   borderRadius: BorderRadius.circular(50),
                   child: Image.asset(
@@ -86,7 +99,6 @@ class _MentorScreenState extends State<MentorScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Mentor Name
                 Text(
                   mentors[index].name,
                   style: const TextStyle(
@@ -96,7 +108,6 @@ class _MentorScreenState extends State<MentorScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                // Mentor Description
                 Text(
                   mentors[index].description,
                   style: TextStyle(
@@ -107,8 +118,6 @@ class _MentorScreenState extends State<MentorScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const Spacer(),
-                // Action Buttons
-              // Action Buttons
 Row(
   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
   children: [
@@ -116,36 +125,34 @@ Row(
   child: ElevatedButton.icon(
     style: ElevatedButton.styleFrom(
       backgroundColor: Colors.teal,
-      foregroundColor: Colors.white, // Set icon and text color to white
+      foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
-      padding: EdgeInsets.symmetric(vertical: 12), // Adjust padding
+      padding: const EdgeInsets.symmetric(vertical: 12),
     ),
     onPressed: () {
-      // Navigate to Mentor's profile
     },
-    icon: const Icon(Icons.person, size: 20), // Adjust icon size
-    label: const Text('Profile', style: TextStyle(fontSize: 16)), // Adjust text size
+    icon: const Icon(Icons.person, size: 20), 
+    label: const Text('Profile', style: TextStyle(fontSize: 16)),
   ),
 ),
-    SizedBox(width: 8), // Add spacing between buttons
+    const SizedBox(width: 8),
     Expanded(
       child: OutlinedButton.icon(
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: Colors.teal),
+          side: const BorderSide(color: Colors.teal),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          padding: EdgeInsets.symmetric(vertical: 12), // Adjust padding
+          padding: const EdgeInsets.symmetric(vertical: 12),
         ),
         onPressed: () {
-          // Connect with Mentor
         },
-        icon: const Icon(Icons.message, color: Colors.teal, size: 20), // Adjust icon size
+        icon: const Icon(Icons.message, color: Colors.teal, size: 20),  
         label: const Text(
           'Connect',
-          style: TextStyle(color: Colors.teal, fontSize: 16), // Adjust text size
+          style: TextStyle(color: Colors.teal, fontSize: 16),
         ),
       ),
     ),
@@ -161,7 +168,7 @@ Row(
         itemHeight: MediaQuery.of(context).size.height * 0.65,
         layout: SwiperLayout.STACK,
       ),
-      bottomNavigationBar: BottomNavigation(currentIndex: 3),
+      bottomNavigationBar: const BottomNavigation(currentIndex: 3),
     );
   }
 }

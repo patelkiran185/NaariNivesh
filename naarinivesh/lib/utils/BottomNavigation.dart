@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:naarinivesh/screens/home.dart';
 import 'package:naarinivesh/screens/invest.dart';
 import 'package:naarinivesh/screens/learn.dart';
-import 'package:naarinivesh/screens/mentor.dart';
 import 'package:naarinivesh/screens/profile.dart';
+import 'package:naarinivesh/screens/community.dart';
 
 class BottomNavigation extends StatelessWidget {
   final int currentIndex;
 
-  BottomNavigation({required this.currentIndex});
+  const BottomNavigation({super.key, required this.currentIndex});
 
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
@@ -22,11 +22,11 @@ class BottomNavigation extends StatelessWidget {
         break;
       case 2:
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => HomeScreen()));
+            context, MaterialPageRoute(builder: (context) => const HomeScreen()));
         break;
       case 3:
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => MentorScreen()));
+            context, MaterialPageRoute(builder: (context) => const CommunityScreen()));
         break;
       case 4:
         Navigator.pushReplacement(
@@ -43,7 +43,7 @@ class BottomNavigation extends StatelessWidget {
         BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: 'Invest'),
         BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Learn'),
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Mentor'),
+        BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Community'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],
       currentIndex: currentIndex,

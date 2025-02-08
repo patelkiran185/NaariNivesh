@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 
 class ProfileScreen extends StatelessWidget {
-  // Sample profile data
   final Map<String, dynamic> profile = {
     'name': 'Lakshmi Devi',
     'location': 'Rajasthan, India',
@@ -59,14 +58,13 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // Custom App Bar with Profile Header
           SliverAppBar(
             expandedHeight: 280,
             pinned: true,
             backgroundColor: Colors.teal,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -78,7 +76,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
-                    // Decorative circles
                     Positioned(
                       right: -50,
                       top: -50,
@@ -91,7 +88,6 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Profile Info
                     SafeArea(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -120,7 +116,7 @@ class ProfileScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Text(
                             profile['name'],
                             style: GoogleFonts.poppins(
@@ -136,12 +132,12 @@ class ProfileScreen extends StatelessWidget {
                               color: Colors.white.withOpacity(0.9),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.star, color: Colors.amber, size: 20),
-                              SizedBox(width: 4),
+                              const Icon(Icons.star, color: Colors.amber, size: 20),
+                              const SizedBox(width: 4),
                               Text(
                                 "${profile['rating']}",
                                 style: GoogleFonts.poppins(
@@ -161,16 +157,14 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
 
-          // Profile Content
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Stats Cards
                   Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [Colors.white, Colors.teal.shade50],
@@ -182,7 +176,7 @@ class ProfileScreen extends StatelessWidget {
                         BoxShadow(
                           color: Colors.black.withOpacity(0.1),
                           blurRadius: 10,
-                          offset: Offset(0, 4),
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
@@ -201,9 +195,8 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                  // Financial Progress Section
                   Text(
                     "Financial Progress",
                     style: GoogleFonts.poppins(
@@ -212,12 +205,11 @@ class ProfileScreen extends StatelessWidget {
                       color: Colors.teal.shade700,
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildFinancialProgressSection(),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                  // Achievements
                   Text(
                     "Achievements",
                     style: GoogleFonts.poppins(
@@ -226,12 +218,11 @@ class ProfileScreen extends StatelessWidget {
                       color: Colors.teal.shade700,
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildAchievementsSection(),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                  // Recent Transactions
                   Text(
                     "Recent Transactions",
                     style: GoogleFonts.poppins(
@@ -240,27 +231,26 @@ class ProfileScreen extends StatelessWidget {
                       color: Colors.teal.shade700,
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildTransactionsSection(),
 
-                  SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
-                  // Action Buttons
                   Row(
                     children: [
                       Expanded(
                         child: _buildGradientButton(
                           "Edit Profile",
                           Icons.edit,
-                          [Color.fromARGB(255, 67, 230, 208), Color(0xFF00796B)],
+                          [const Color.fromARGB(255, 67, 230, 208), const Color(0xFF00796B)],
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: _buildGradientButton(
                           "Settings",
                           Icons.settings,
-                          [Color.fromARGB(255, 67, 230, 208), Color(0xFF00796B)],
+                          [const Color.fromARGB(255, 67, 230, 208), const Color(0xFF00796B)],
                         ),
                       ),
                     ],
@@ -271,7 +261,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigation(currentIndex: 4),
+      bottomNavigationBar: const BottomNavigation(currentIndex: 4),
     );
   }
 
@@ -279,7 +269,7 @@ class ProfileScreen extends StatelessWidget {
     return Column(
       children: [
         Icon(icon, color: Colors.teal.shade700, size: 24),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           value,
           style: GoogleFonts.poppins(
@@ -302,13 +292,12 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildFinancialProgressSection() {
     return Column(
       children: [
-        // Savings Goal Card
         Card(
           elevation: 4,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -332,14 +321,14 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 LinearPercentIndicator(
                   lineHeight: 8.0,
                   percent: profile['financialProgress']['savingsGoal']
                       ['progress'],
                   backgroundColor: Colors.grey.shade200,
                   progressColor: Colors.teal,
-                  barRadius: Radius.circular(4),
+                  barRadius: const Radius.circular(4),
                   padding: EdgeInsets.zero,
                 ),
               ],
@@ -347,15 +336,14 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
 
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
-        // Investment Portfolio Card
         Card(
           elevation: 4,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -366,7 +354,7 @@ class ProfileScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -393,7 +381,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.green.shade100,
                         borderRadius: BorderRadius.circular(20),
@@ -414,15 +402,14 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
 
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
-        // Financial Literacy Card
         Card(
           elevation: 4,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -445,14 +432,14 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 LinearPercentIndicator(
                   lineHeight: 8.0,
                   percent: profile['financialProgress']['financialLiteracy']
                       ['progress'],
                   backgroundColor: Colors.grey.shade200,
                   progressColor: Colors.teal,
-                  barRadius: Radius.circular(4),
+                  barRadius: const Radius.circular(4),
                   padding: EdgeInsets.zero,
                 ),
               ],
@@ -460,15 +447,14 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
 
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
 
-        // Credit Score Card
         Card(
           elevation: 4,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -479,7 +465,7 @@ class ProfileScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -494,10 +480,10 @@ class ProfileScreen extends StatelessWidget {
                             color: Colors.teal.shade700,
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Container(
                           padding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
                             color: Colors.green.shade100,
                             borderRadius: BorderRadius.circular(12),
@@ -536,11 +522,11 @@ class ProfileScreen extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: profile['achievements'].map<Widget>((achievement) {
             return Padding(
-              padding: EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.only(bottom: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -551,13 +537,13 @@ class ProfileScreen extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   LinearPercentIndicator(
                     lineHeight: 8.0,
                     percent: achievement['progress'],
                     backgroundColor: Colors.grey.shade200,
                     progressColor: Colors.teal,
-                    barRadius: Radius.circular(4),
+                    barRadius: const Radius.circular(4),
                     padding: EdgeInsets.zero,
                   ),
                 ],
@@ -575,7 +561,7 @@ class ProfileScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ListView.builder(
         shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: profile['recentTransactions'].length,
         itemBuilder: (context, index) {
           final transaction = profile['recentTransactions'][index];
@@ -629,7 +615,7 @@ class ProfileScreen extends StatelessWidget {
           BoxShadow(
             color: colors[0].withOpacity(0.3),
             blurRadius: 8,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -638,7 +624,7 @@ class ProfileScreen extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
-          padding: EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -650,7 +636,7 @@ class ProfileScreen extends StatelessWidget {
               icon,
               color: Colors.white,
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Text(
               text,
               style: GoogleFonts.poppins(

@@ -12,9 +12,25 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Welcome, Lakshmi'),
+        title: const Text(
+          'Welcome, Lakshmi!',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.normal,
+            letterSpacing: 1.2,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
+        elevation: 6,
+        shadowColor: Colors.black45,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
+        ),
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -27,7 +43,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 shrinkWrap: true,
-                childAspectRatio: 1.1, // Adjusted to prevent overflow
+                childAspectRatio: 1.1,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   _buildCard(
@@ -93,10 +109,10 @@ class HomeScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12.0), // Reduced padding
+          padding: const EdgeInsets.all(12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min, // Added to prevent expansion
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -105,21 +121,21 @@ class HomeScreen extends StatelessWidget {
                     child: Text(
                       title,
                       style: const TextStyle(
-                        fontSize: 13, // Slightly reduced font size
+                        fontSize: 13, 
                         fontWeight: FontWeight.bold,
                       ),
-                      maxLines: 2, // Limit lines
+                      maxLines: 2, 
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Icon(icon, size: 20, color: Colors.teal), // Reduced icon size
+                  Icon(icon, size: 20, color: Colors.teal),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 20, // Reduced font size
+                  fontSize: 20, 
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 1,
@@ -128,8 +144,8 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: const TextStyle(fontSize: 11, color: Colors.grey), // Reduced font size
-                maxLines: 2, // Limit lines
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
