@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:naarinivesh/utils/BottomNavigation.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:lottie/lottie.dart';
 
 // Previous model classes remain the same...
 class UserProfile {
