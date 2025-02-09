@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:naarinivesh/screens/home.dart';
 import 'package:naarinivesh/screens/invest.dart';
-import 'package:naarinivesh/screens/learn.dart';
+import 'package:naarinivesh/screens/learnmain.dart';
 import 'package:naarinivesh/screens/mentor.dart';
 import 'package:naarinivesh/screens/profile.dart';
 
@@ -18,7 +18,7 @@ class BottomNavigation extends StatelessWidget {
         break;
       case 1:
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => LearnScreen()));
+            context, MaterialPageRoute(builder: (context) => LearnmainScreen()));
         break;
       case 2:
         Navigator.pushReplacement(
