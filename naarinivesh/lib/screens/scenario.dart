@@ -2,10 +2,12 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:naarinivesh/constants.dart';
 
 class ScenarioScreen extends StatefulWidget {
   final int level;
-  
+
   const ScenarioScreen({Key? key, required this.level}) : super(key: key);
 
   @override
@@ -22,14 +24,16 @@ class _ScenarioScreenState extends State<ScenarioScreen> {
   @override
   void initState() {
     super.initState();
+
     _scenarioFuture = _fetchScenario();
   }
 
   Future<Map<String, dynamic>> _fetchScenario() async {
+    print(ip);
     final response = await http.get(
-      Uri.parse('http://localhost:5000/scenario/${widget.level}'),
+      Uri.parse('http://${ip}:5000/scenario/${widget.level}'),
     );
-    
+
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -44,7 +48,7 @@ class _ScenarioScreenState extends State<ScenarioScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://localhost:5000/evaluate'),
+        Uri.parse('http://${ip}:5000/evaluate'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'level': widget.level,
@@ -81,9 +85,10 @@ class _ScenarioScreenState extends State<ScenarioScreen> {
             future: _scenarioFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator(color: Colors.white));
+                return Center(
+                    child: CircularProgressIndicator(color: Colors.white));
               }
-              
+
               if (snapshot.hasError) {
                 return Center(
                   child: Text(
@@ -94,7 +99,7 @@ class _ScenarioScreenState extends State<ScenarioScreen> {
               }
 
               final scenario = snapshot.data!;
-              
+
               return Column(
                 children: [
                   // Character and dialog bubble
@@ -198,7 +203,7 @@ class _ScenarioScreenState extends State<ScenarioScreen> {
                                     ),
                                   ),
                                 );
-                                                            },
+                              },
                             ),
                           ),
                           if (feedback.isNotEmpty)

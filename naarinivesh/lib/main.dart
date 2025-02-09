@@ -2,8 +2,17 @@ import 'package:flutter/material.dart';
 // import 'screens/home.dart';
 import 'screens/signup.dart';
 import 'screens/login.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() => runApp(const MyApp());
+void main() async {
+  // Ensure that plugin services are initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  // await dotenv.load(fileName: ".env"); 
+
+  runApp(MyApp()); 
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
