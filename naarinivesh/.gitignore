@@ -41,3 +41,14 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+.metadata
+android/.gradle/
+android/app/debug.keystore
+android/key.properties
+
+.vscode/
+
+*.log
+pubspec.lock
+*.iml
