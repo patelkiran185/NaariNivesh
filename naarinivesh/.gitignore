@@ -47,8 +47,4 @@ android/.gradle/
 android/app/debug.keystore
 android/key.properties
 
-.vscode/
-
-*.log
 pubspec.lock
-*.iml
