@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-// import 'screens/home.dart';
 import 'screens/signup.dart';
 import 'screens/login.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() => runApp(const MyApp());
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,7 +16,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Colors.teal, colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.purple),
+        primaryColor: Colors.teal,
+        colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.purple),
       ),
       home: const WelcomeScreen(),
     );
@@ -52,7 +56,8 @@ class WelcomeScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.teal,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -73,7 +78,8 @@ class WelcomeScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.teal,
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.teal,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
