@@ -1,8 +1,14 @@
+
+
+import base64
+import os
+import requests
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import google.generativeai as genai
-import os
-from dotenv import load_dotenv
+import re
+import json
 
 # Load environment variables
 load_dotenv()
@@ -15,102 +21,136 @@ CORS(app)
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 model = genai.GenerativeModel('gemini-pro')
 
-# Predefined scenarios for different levels
-
-SCENARIOS = {
-    1: {
-        "scenario": "You are cooking when a sudden fire breaks out in the kitchen. The flames are spreading quickly, and your children are in another room.",
-        "choices": [
-            "Immediately leave the house with your children and call for help.",
-            "Try to put out the fire with water or a cloth.",
-            "Grab some valuables before evacuating.",
-            "Run outside and wait for someone else to help."
-        ]
-    },
-    2: {
-        "scenario": "You have been working at a local shop for two years, but today your employer informs you that the shop is closing, and you have lost your job.",
-        "choices": [
-            "Use your emergency savings to cover basic needs while searching for a new job.",
-            "Take a loan immediately to manage household expenses.",
-            "Wait and see if another opportunity comes up without taking action.",
-            "Spend on essentials but avoid unnecessary expenses while looking for a new job."
-        ]
-    },
-    3: {
-        "scenario": "You suddenly feel unwell and visit a clinic. The doctor tells you that you need urgent medical treatment, but it is expensive.",
-        "choices": [
-            "Use your health insurance or savings for medical emergencies.",
-            "Take a high-interest loan to cover the costs immediately.",
-            "Delay treatment and hope your condition improves naturally.",
-            "Sell valuable assets like jewelry to pay for the treatment."
-        ]
-    },
-    4: {
-        "scenario": "Your family member has a medical emergency in the middle of the night, and you need to arrange funds quickly.",
-        "choices": [
-            "Use emergency savings or a community support fund if available.",
-            "Borrow from friends or family who can help without high interest.",
-            "Take a loan from a moneylender with very high interest.",
-            "Ignore the situation and hope it gets better by morning."
-        ]
-    },
-    5: {
-        "scenario": "A cyclone warning has been issued for your village, and evacuation orders have been given.",
-        "choices": [
-            "Pack important documents, food, and essentials before leaving.",
-            "Stay at home and wait to see if the cyclone actually hits.",
-            "Leave without preparing anything in a hurry.",
-            "Ignore the warning and continue daily activities as usual."
-        ]
-    }
+# Define levels
+LEVELS = {
+    1: "Basic Emergency",
+    2: "Health Crisis",
+    3: "Job Loss",
+    4: "Financial Debt",
+    5: "Family Emergency",
+    6: "Natural Disaster"
 }
 
+def extract_keywords(text, num_keywords=5):
+    """Extract key phrases from the generated scenario text."""
+    words = re.findall(r'\b[A-Za-z]{4,}\b', text)
+    return ", ".join(words[:num_keywords])
 
+def generate_image(prompt):
+    """Generate an image using Hugging Face Stable Diffusion and return Base64."""
+    url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
+    headers = {"Authorization": f"Bearer {os.getenv('HF_API_KEY')}"}
+    data = {"inputs": prompt, "parameters": {"use_cache": False}}
+
+    response = requests.post(url, json=data, headers=headers)
+
+    if response.status_code == 200:
+        return base64.b64encode(response.content).decode("utf-8")  # Convert to Base64
+    else:
+        return None
+
+def extract_options_from_json(ai_response):
+    """Extract scenario and options from the AI response formatted as JSON."""
+    try:
+        response_json = json.loads(ai_response)  # Parse AI output as JSON
+        scenario = response_json.get("scenario", "").strip()
+        options = response_json.get("options", [])
+
+        if not scenario or len(options) != 4:
+            raise ValueError("Invalid JSON format from AI")
+
+        return scenario, options
+    except Exception as e:
+        print(f"Error parsing AI response: {str(e)}")
+        return None, None
 
 @app.route('/scenario/<int:level>', methods=['GET'])
 def get_scenario(level):
-    """Endpoint to get scenario for a specific level"""
-    if level not in SCENARIOS:
+    """Generate a scenario dynamically based on the crisis level."""
+    if level not in LEVELS:
         return jsonify({"error": "Invalid level"}), 404
-    return jsonify(SCENARIOS[level])
+
+    prompt = f'''
+    Imagine you are a rural woman running a small business or trying to become financially independent.
+    Suddenly, a crisis occurs that threatens your ability to sustain yourself. Describe the situation in the
+    second person ("you") as if the woman is experiencing it herself. The crisis should be a "{LEVELS[level]}".
+    Make the scenario emotionally engaging and very clear.
+
+    Provide exactly four multiple-choice options for how she can respond to the crisis.
+    The options should be realistic and relevant to her situation.
+
+    Return the output as a JSON object with the following structure:
+
+    {{
+    "scenario": "[A very clear and emotionally engaging situation]",
+    "options": [
+        "Option 1",
+        "Option 2",
+        "Option 3",
+        "Option 4"
+    ]
+    }}
+
+    Do NOT include any explanations beyond the scenario and the four choices.
+    Do NOT add unnecessary text.
+    Do NOT repeat the answer format in the output.
+    '''
+
+    try:
+        response = model.generate_content(prompt)
+        scenario_text = response.text.strip()
+
+        # Extract scenario and response options from JSON
+        scenario, options = extract_options_from_json(scenario_text)
+
+        if not scenario or not options:
+            return jsonify({"error": "AI response format incorrect, try again."}), 500
+
+        # Generate image based on scenario keywords
+        keywords = extract_keywords(scenario)
+        image_base64 = generate_image(keywords)  # Get Base64 encoded image
+
+        return jsonify({
+            "scenario": scenario,
+            "image_base64": image_base64 if image_base64 else None,
+            "response_options": options  # Send extracted response options
+        })
+
+    except Exception as e:
+        print(f"Error generating scenario: {str(e)}")
+        return jsonify({"error": "Failed to generate scenario"}), 500
 
 @app.route('/evaluate', methods=['POST'])
 def evaluate_choice():
     """Endpoint to evaluate user's choice using Gemini"""
     data = request.get_json()
-    level = data.get('level')
     choice = data.get('choice')
-    if not choice:
-        return jsonify({"error": "Invalid choice"}), 400
-    if not level or level not in SCENARIOS:
-        return jsonify({"error": "Invalid level"}), 400
-    
-    scenario = SCENARIOS[level]["scenario"]
-    
+    scenario = data.get('scenario')
+
+    if not choice or not scenario:
+        return jsonify({"error": "Invalid input"}), 400
+
     # Prompt for Gemini
     prompt = f"""As a crisis management expert, evaluate this response to an emergency scenario:
 
-Scenario: {scenario}
+    Scenario: {scenario}
 
-User's Response: {choice}
+    User's Response: {choice}
 
-Provide a brief, constructive feedback (2-3 sentences) on this choice. Consider:
-1. The immediate safety impact
-2. The long-term consequences
-3. Best practices in emergency response
+    Provide a brief, constructive feedback (2-3 sentences) on this choice. Consider:
+    1. The immediate safety impact
+    2. The long-term consequences
+    3. Best practices in emergency response
 
-Format your response to the user (this is a crisis readness planner everything is a simulation), focus on what they did well and/or how they could improve their response. Keep it educational and encouraging. Tell them to try again if it's the wrong answer"""
+    Format your response to the user (this is a crisis readiness planner and everything is a simulation).
+    Focus on what they did well and/or how they could improve their response.
+    Keep it breif, educational and encouraging. If the answer is incorrect, kindly suggest they try again."""
 
     try:
         # Generate response using Gemini
         response = model.generate_content(prompt)
-        feedback = response.text
-        
-        # Clean and format the feedback
-        feedback = feedback.strip()
-        if len(feedback) > 500:  # Truncate if too long
-            feedback = feedback[:497] + "..."
-            
+        feedback = response.text.strip()
+
         return jsonify({"feedback": feedback})
     
     except Exception as e:
@@ -121,4 +161,4 @@ Format your response to the user (this is a crisis readness planner everything i
         }), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True) 
+    app.run(host='0.0.0.0', port=5000, debug=True)

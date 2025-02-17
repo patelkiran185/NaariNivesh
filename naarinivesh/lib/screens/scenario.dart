@@ -1,70 +1,107 @@
-// scenario_screen.dart
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:naarinivesh/constants.dart';
+import 'dart:typed_data';
+import 'package:confetti/confetti.dart';
 
 class ScenarioScreen extends StatefulWidget {
   final int level;
 
-  const ScenarioScreen({Key? key, required this.level}) : super(key: key);
+  ScenarioScreen({required this.level});
 
   @override
   _ScenarioScreenState createState() => _ScenarioScreenState();
 }
 
 class _ScenarioScreenState extends State<ScenarioScreen> {
-  late Future<Map<String, dynamic>> _scenarioFuture;
-  List<String> choices = [];
-  String? selectedChoice;
-  bool isLoading = false;
-  String feedback = '';
+  Future<Map<String, dynamic>>? scenarioFuture;
+  String? selectedOption;
+  bool isEvaluating = false;
+  String feedback = "";
+  bool isLoading = true; // Track loading state
+  late ConfettiController _confettiController; // 🎉 Confetti controller
 
   @override
   void initState() {
     super.initState();
-
-    _scenarioFuture = _fetchScenario();
+    scenarioFuture = fetchScenario();
+    _confettiController = ConfettiController(duration: Duration(seconds: 3)); // 🎉 Confetti duration
   }
 
-  Future<Map<String, dynamic>> _fetchScenario() async {
-    print(ip);
-    final response = await http.get(
-      Uri.parse('http://${ip}:5000/scenario/${widget.level}'),
-    );
+  @override
+  void dispose() {
+    _confettiController.dispose(); // 🎉 Dispose confetti controller when leaving the screen
+    super.dispose();
+  }
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load scenario');
+  Future<Map<String, dynamic>> fetchScenario() async {
+    setState(() => isLoading = true);
+    try {
+      final response = await http.get(Uri.parse('http://${ip}:5000/scenario/${widget.level}'));
+
+      if (response.statusCode == 200) {
+        setState(() => isLoading = false);
+        return jsonDecode(response.body);
+      } else {
+        setState(() => isLoading = false);
+        throw Exception("Failed to load scenario");
+      }
+    } catch (e) {
+      print("Error fetching scenario: $e");
+      setState(() => isLoading = false);
+      return {"scenario": "Error fetching scenario.", "image_base64": null, "response_options": []};
     }
   }
 
-  Future<void> _submitChoice(String choice) async {
+  Future<void> evaluateChoice(String choice, String scenario) async {
     setState(() {
-      isLoading = true;
+      isEvaluating = true;
+      feedback = "";
     });
 
     try {
       final response = await http.post(
         Uri.parse('http://${ip}:5000/evaluate'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'level': widget.level,
-          'choice': choice,
-        }),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"choice": choice, "scenario": scenario}),
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = jsonDecode(response.body);
         setState(() {
-          feedback = data['feedback'];
+          feedback = data["feedback"] ?? "No feedback available.";
+          isEvaluating = false;
         });
+
+        // 🎉 Trigger Confetti Effect when "OK" is pressed in the feedback dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Feedback"),
+              content: Text(feedback),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _confettiController.play(); // 🎉 Start confetti effect
+                  },
+                  child: Text("OK"),
+                ),
+              ],
+            );
+          },
+        );
+      } else {
+        throw Exception("Failed to evaluate choice");
       }
-    } finally {
+    } catch (e) {
+      print("Error evaluating choice: $e");
       setState(() {
-        isLoading = false;
+        feedback = "Error evaluating response. Try again.";
+        isEvaluating = false;
       });
     }
   }
@@ -72,179 +109,127 @@ class _ScenarioScreenState extends State<ScenarioScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.teal.shade700, Colors.teal.shade900],
-          ),
-        ),
-        child: SafeArea(
-          child: FutureBuilder<Map<String, dynamic>>(
-            future: _scenarioFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                    child: CircularProgressIndicator(color: Colors.white));
-              }
+      appBar: AppBar(title: Text("Emergency Scenario")),
+      body: Stack(
+        children: [
+          if (isLoading)
+            Center(child: CircularProgressIndicator()) // Show loading indicator while fetching data
+          else
+            FutureBuilder<Map<String, dynamic>>(
+              future: scenarioFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
 
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    'Error loading scenario',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                );
-              }
+                if (snapshot.hasError || !snapshot.hasData) {
+                  return Center(child: Text("Error fetching scenario."));
+                }
 
-              final scenario = snapshot.data!;
+                final scenarioText = snapshot.data?["scenario"] ?? "No scenario available.";
+                final String? imageBase64 = snapshot.data?["image_base64"];
+                final responseOptions = (snapshot.data?["response_options"] ?? []).cast<String>();
 
-              return Column(
-                children: [
-                  // Character and dialog bubble
-                  Expanded(
-                    flex: 2,
-                    child: Stack(
+                Uint8List? imageBytes;
+                if (imageBase64 != null && imageBase64.isNotEmpty) {
+                  imageBytes = base64Decode(imageBase64);
+                }
+
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
                       children: [
-                        // Background scene
-                        Positioned.fill(
-                          child: Image.asset(
-                            'assets/scenario_bg.png',
-                            fit: BoxFit.cover,
-                          ),
+                        // Scenario text
+                        Text(
+                          scenarioText,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        // Character
-                        Positioned(
-                          bottom: 0,
-                          left: 20,
-                          child: Image.asset(
-                            'assets/character.png',
-                            height: 200,
-                          ),
+                        SizedBox(height: 16),
+
+                        // Display Base64 image
+                        if (imageBytes != null)
+                          Image.memory(imageBytes, height: 200, fit: BoxFit.cover)
+                        else
+                          Icon(Icons.image_not_supported, size: 100),
+
+                        SizedBox(height: 16),
+                        Text(
+                          "Choose what you would do in this situation:",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                        // Dialog bubble
-                        Positioned(
-                          top: 40,
-                          left: 20,
-                          right: 20,
-                          child: Container(
-                            padding: EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 5),
+
+                        // Response options
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: responseOptions.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedOption = responseOptions[index];
+                                });
+                                evaluateChoice(responseOptions[index], scenarioText);
+                              },
+                              child: Container(
+                                margin: EdgeInsets.symmetric(vertical: 8),
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: selectedOption == responseOptions[index]
+                                      ? Colors.teal.withOpacity(0.3)
+                                      : Colors.grey.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: selectedOption == responseOptions[index]
+                                        ? Colors.teal
+                                        : Colors.grey,
+                                    width: 1.5,
+                                  ),
                                 ),
-                              ],
-                            ),
-                            child: Text(
-                              scenario['scenario'],
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.teal.shade900,
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.touch_app, color: Colors.teal),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        responseOptions[index],
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
+
+                        if (isEvaluating)
+                          Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: CircularProgressIndicator(),
+                          ),
                       ],
                     ),
                   ),
-                  // Choices
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(30),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'What would you do?',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.teal.shade900,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: (scenario['choices'] as List).length,
-                              itemBuilder: (context, index) {
-                                final choice = scenario['choices'][index];
-                                return Padding(
-                                  padding: EdgeInsets.only(bottom: 8),
-                                  child: ElevatedButton(
-                                    onPressed: isLoading
-                                        ? null
-                                        : () => _submitChoice(choice),
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.teal.shade50,
-                                      padding: EdgeInsets.all(16),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                    ),
-                                    child: Text(
-                                      choice,
-                                      style: TextStyle(
-                                        color: Colors.teal.shade900,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          if (feedback.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16),
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.teal.shade50,
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(
-                                    color: Colors.teal.shade200,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: Text(
-                                  feedback,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.teal.shade900,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          if (isLoading)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16),
-                              child: CircularProgressIndicator(
-                                color: Colors.teal.shade900,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+                );
+              },
+            ),
+
+          // 🎉 Confetti Widget
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirection: 3.14 / 2, // 🎉 Shoot confetti downward
+              emissionFrequency: 0.05, // 🎉 Frequency of confetti
+              numberOfParticles: 20, // 🎉 Amount of confetti
+              gravity: 0.3, // 🎉 Slow fall
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
