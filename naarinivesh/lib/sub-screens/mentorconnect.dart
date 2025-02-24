@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:card_swiper/card_swiper.dart';
+import 'package:naarinivesh/sub-screens/mentorprofile.dart';
 import 'package:naarinivesh/utils/BottomNavigation.dart';
 
 class MentorScreen extends StatefulWidget {
@@ -118,69 +119,82 @@ class _MentorScreenState extends State<MentorScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const Spacer(),
-Row(
-  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  children: [
-    Expanded(
-  child: ElevatedButton.icon(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.teal,
-      foregroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 12),
-    ),
-    onPressed: () {
-    },
-    icon: const Icon(Icons.person, size: 20), 
-    label: const Text('Profile', style: TextStyle(fontSize: 16)),
-  ),
-),
-    const SizedBox(width: 8),
-    Expanded(
-      child: OutlinedButton.icon(
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Colors.teal),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
-        onPressed: () {
-        },
-        icon: const Icon(Icons.message, color: Colors.teal, size: 20),  
-        label: const Text(
-          'Connect',
-          style: TextStyle(color: Colors.teal, fontSize: 16),
-        ),
-      ),
-    ),
-  ],
-),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MentorProfileScreen(
+                            name: mentors[index].name,
+                            description: mentors[index].description,
+                            imageUrl: mentors[index].imageUrl,
+                            expertise: "Finance & Investment",
+                            experience: "10+ years",
+                            contact: "mentor@example.com",
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.person, size: 20), 
+                    label: const Text('Profile', style: TextStyle(fontSize: 16)),
+                  ),
+                ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.teal),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        onPressed: () {
+                        },
+                        icon: const Icon(Icons.message, color: Colors.teal, size: 20),  
+                        label: const Text(
+                          'Connect',
+                          style: TextStyle(color: Colors.teal, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
 
-              ],
-            ),
-          ),
-        ),
-        itemCount: mentors.length,
-        itemWidth: MediaQuery.of(context).size.width * 0.8,
-        itemHeight: MediaQuery.of(context).size.height * 0.65,
-        layout: SwiperLayout.STACK,
-      ),
-      bottomNavigationBar: const BottomNavigation(currentIndex: 3),
-    );
-  }
-}
+                              ],
+                            ),
+                          ),
+                        ),
+                        itemCount: mentors.length,
+                        itemWidth: MediaQuery.of(context).size.width * 0.8,
+                        itemHeight: MediaQuery.of(context).size.height * 0.65,
+                        layout: SwiperLayout.STACK,
+                      ),
+                      bottomNavigationBar: const BottomNavigation(currentIndex: 3),
+                    );
+                  }
+                }
 
-class MentorCard {
-  final String name;
-  final String description;
-  final String imageUrl;
+                class MentorCard {
+                  final String name;
+                  final String description;
+                  final String imageUrl;
 
-  MentorCard({
-    required this.name,
-    required this.description,
-    required this.imageUrl,
-  });
-}
+                  MentorCard({
+                    required this.name,
+                    required this.description,
+                    required this.imageUrl,
+                  });
+                }

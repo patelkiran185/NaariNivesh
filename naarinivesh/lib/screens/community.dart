@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:naarinivesh/sub-screens/mentor.dart';
+import 'package:naarinivesh/sub-screens/mentorconnect.dart';
 import 'package:naarinivesh/sub-screens/peers.dart';
 import 'package:naarinivesh/utils/BottomNavigation.dart';
 
