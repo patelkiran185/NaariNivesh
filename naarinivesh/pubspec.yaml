@@ -15,6 +15,13 @@ dependencies:
   animated_text_kit: ^4.2.2
   lottie: ^2.3.2
   card_swiper: ^3.0.1
+<<<<<<< HEAD
+=======
+  firebase_auth: ^5.4.2
+  firebase_core: ^3.11.0
+  firebase_database: ^11.3.3
+  cloud_firestore: ^5.6.4
+>>>>>>> f83b0e4 (database)
 
 dev_dependencies:
   flutter_test:

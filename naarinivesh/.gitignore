@@ -42,9 +42,15 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+<<<<<<< HEAD
 .metadata
 android/.gradle/
 android/app/debug.keystore
 android/key.properties
 
 pubspec.lock
+=======
+firebase.json
+
+pubspec.lock
+>>>>>>> f83b0e4 (database)
