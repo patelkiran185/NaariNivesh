@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:naarinivesh/utils/BottomNavigation.dart';
 import 'package:naarinivesh/sub-screens/finhealth.dart';
 import 'package:naarinivesh/sub-screens/personalrecommend.dart';
 import 'package:naarinivesh/sub-screens/progress.dart';
 import 'package:naarinivesh/sub-screens/skilldashboard.dart';
+import 'package:naarinivesh/main.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -31,6 +33,12 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () => _logout(context),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -84,8 +92,24 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigation(currentIndex: 2),
+      bottomNavigationBar: const BottomNavigation(currentIndex: 2),
     );
+  }
+
+  void _logout(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      // Redirect to Welcome Screen after logout
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+        (route) => false, // Clears the navigation stack
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Logout failed: ${e.toString()}")),
+      );
+    }
   }
 
   Widget _buildCard({
