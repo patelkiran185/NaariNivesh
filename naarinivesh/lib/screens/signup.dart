@@ -65,11 +65,12 @@ class _SignUpPageState extends State<SignUpPage> {
           const SnackBar(content: Text("Account created successfully!")),
         );
 
-        // Navigate to Login page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
+        // Navigate based on role
+        if (selectedRole == "Mentor") {
+          Navigator.pushReplacementNamed(context, '/mentorHome');
+        } else {
+          Navigator.pushReplacementNamed(context, '/learnerHome');
+        }
       }
     } catch (e) {
       _showErrorDialog(e.toString());

@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home.dart';
+import 'learner_home.dart';
 import 'signup.dart';
 
 class LoginPage extends StatefulWidget {
@@ -38,15 +39,22 @@ class _LoginPageState extends State<LoginPage> {
 
       User? user = userCredential.user;
       if (user != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Login Successful!")),
-        );
+        DocumentSnapshot userDoc =
+            await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
-        // Navigate to Home Page
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomeScreen()),
-        );
+        if (userDoc.exists) {
+          String role = userDoc['role'];
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Login Successful!")),
+          );
+
+          // Navigate based on role
+          if (role == "Mentor") {
+            Navigator.pushReplacementNamed(context, '/mentorHome');
+          } else {
+            Navigator.pushReplacementNamed(context, '/learnerHome');
+          }
+        }
       }
     } catch (e) {
       _showErrorDialog("Login failed: ${e.toString()}");

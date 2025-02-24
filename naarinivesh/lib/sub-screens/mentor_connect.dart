@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:card_swiper/card_swiper.dart';
-import 'package:naarinivesh/sub-screens/mentorprofile.dart';
+import 'package:naarinivesh/sub-screens/mentor_profile.dart';
 import 'package:naarinivesh/utils/BottomNavigation.dart';
 
 class MentorScreen extends StatefulWidget {

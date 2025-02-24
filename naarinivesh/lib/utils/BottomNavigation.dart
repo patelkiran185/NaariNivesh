@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:naarinivesh/screens/home.dart';
+import 'package:naarinivesh/screens/learner_home.dart';
 import 'package:naarinivesh/screens/invest.dart';
 import 'package:naarinivesh/screens/learn.dart';
 import 'package:naarinivesh/screens/profile.dart';

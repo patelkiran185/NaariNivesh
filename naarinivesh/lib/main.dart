@@ -1,15 +1,24 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:naarinivesh/screens/mentor_home.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'screens/signup.dart';
 import 'screens/login.dart';
-import 'screens/home.dart';
+import 'screens/learner_home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(MaterialApp(
+    initialRoute: '/login',
+    routes: {
+      '/login': (context) => const LoginPage(),
+      '/signup': (context) => const SignUpPage(),
+      '/learnerHome': (context) => const HomeScreen(),
+      '/mentorHome': (context) => const MentorHomePage(),
+    },
+  ));
 }
 
 class MyApp extends StatelessWidget {
