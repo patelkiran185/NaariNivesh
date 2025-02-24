@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:naarinivesh/utils/BottomNavigation.dart';
 import 'package:naarinivesh/sub-screens/finhealth.dart';
@@ -7,20 +8,54 @@ import 'package:naarinivesh/sub-screens/progress.dart';
 import 'package:naarinivesh/sub-screens/skilldashboard.dart';
 import 'package:naarinivesh/main.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String userName = "User"; // Default value
+  bool isLoading = true; // Loading state
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  void _fetchUserName() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          setState(() {
+            userName = userDoc['name'] ?? "User";
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      print("Error fetching user name: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Welcome, Lakshmi!',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.normal,
-            letterSpacing: 1.2,
-          ),
+        title: Text(
+          isLoading ? 'Welcome...' : 'Welcome, $userName!',
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.normal, letterSpacing: 1.2),
         ),
         centerTitle: true,
         backgroundColor: Colors.teal,
@@ -28,9 +63,7 @@ class HomeScreen extends StatelessWidget {
         elevation: 6,
         shadowColor: Colors.black45,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(20),
-          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
         ),
         automaticallyImplyLeading: false,
         actions: [
@@ -99,11 +132,10 @@ class HomeScreen extends StatelessWidget {
   void _logout(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
-      // Redirect to Welcome Screen after logout
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-        (route) => false, // Clears the navigation stack
+        (route) => false,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,56 +154,25 @@ class HomeScreen extends StatelessWidget {
   }) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => screen),
-        );
+        Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
       },
       child: Card(
         elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 13, 
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 2, 
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Icon(icon, size: 20, color: Colors.teal),
-                ],
-              ),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Expanded(child: Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis)),
+                Icon(icon, size: 20, color: Colors.teal),
+              ]),
               const SizedBox(height: 8),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 20, 
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
               const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: const TextStyle(fontSize: 11, color: Colors.grey),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Text(subtitle, style: const TextStyle(fontSize: 11, color: Colors.grey), maxLines: 2, overflow: TextOverflow.ellipsis),
             ],
           ),
         ),
