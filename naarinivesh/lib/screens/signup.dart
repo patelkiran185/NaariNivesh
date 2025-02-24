@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -11,11 +12,15 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  String selectedRole = 'Learner';
+
+  String selectedRole = 'Learner'; // Default role
+  bool _isLoading = false;
 
   void _signUp() async {
     String name = _nameController.text.trim();
@@ -33,24 +38,45 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      await userCredential.user?.updateDisplayName(name);
+      User? user = userCredential.user;
+      if (user != null) {
+        await user.updateDisplayName(name);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Account created successfully!")),
-      );
+        // Store user data in Firestore
+        await _firestore.collection("users").doc(user.uid).set({
+          "name": name,
+          "email": email,
+          "role": selectedRole,
+          "uid": user.uid,
+          "createdAt": FieldValue.serverTimestamp(),
+        });
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Account created successfully!")),
+        );
+
+        // Navigate to Login page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
     } catch (e) {
       _showErrorDialog(e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -76,73 +102,81 @@ class _SignUpPageState extends State<SignUpPage> {
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: SizedBox(
-          height: MediaQuery.of(context).size.height, // Ensure full screen height
+          height: MediaQuery.of(context).size.height,
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // Prevents excessive spacing
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
                     'Create an Account',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal,
-                    ),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.teal),
                   ),
                   const SizedBox(height: 10),
                   const Text(
                     'Sign up to get started',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black54,
-                    ),
+                    style: TextStyle(fontSize: 18, color: Colors.black54),
                   ),
                   const SizedBox(height: 40),
+                  
                   _buildTextField(_nameController, Icons.person, 'Full Name'),
                   const SizedBox(height: 20),
-
-                  // Email Field
-                  _buildTextField(Icons.email as TextEditingController, 'Email' as IconData, keyboardType: TextInputType.emailAddress),
+                  _buildTextField(_emailController, Icons.email, 'Email', keyboardType: TextInputType.emailAddress),
+                  const SizedBox(height: 20),
+                  _buildTextField(_passwordController, Icons.lock, 'Password', obscureText: true),
+                  const SizedBox(height: 20),
+                  _buildTextField(_confirmPasswordController, Icons.lock_outline, 'Confirm Password', obscureText: true),
                   const SizedBox(height: 20),
 
-                  // Password Field
-                  _buildTextField(Icons.lock as TextEditingController, 'Password' as IconData, obscureText: true),
+                  // Role selection dropdown
+                  DropdownButtonFormField<String>(
+                    value: selectedRole,
+                    items: const [
+                      DropdownMenuItem(value: 'Learner', child: Text('Learner')),
+                      DropdownMenuItem(value: 'Mentor', child: Text('Mentor')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedRole = value!;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Select Role',
+                      prefixIcon: const Icon(Icons.person_outline, color: Colors.teal),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                    ),
+                  ),
                   const SizedBox(height: 20),
 
-                  // Confirm Password Field
-                  _buildTextField(Icons.lock_outline as TextEditingController, 'Confirm Password' as IconData, obscureText: true),
-                  const SizedBox(height: 20),
+                  // Sign Up Button
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     ),
-                    onPressed: _signUp,
-                    child: const Text('Sign Up', style: TextStyle(fontSize: 18)),
+                    onPressed: _isLoading ? null : _signUp,
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text('Sign Up', style: TextStyle(fontSize: 18)),
                   ),
                   const SizedBox(height: 20),
+
+                  // Navigate to Login Page
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text("Already have an account?", style: TextStyle(fontSize: 16)),
                       TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const LoginPage()),
-                          );
-                        },
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(color: Colors.teal, fontSize: 16, fontWeight: FontWeight.bold),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const LoginPage()),
                         ),
+                        child: const Text('Login', style: TextStyle(color: Colors.teal, fontSize: 16, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -155,20 +189,19 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, IconData icon, String hintText, {bool obscureText = false, TextInputType keyboardType = TextInputType.text}) {
+  // Helper method for text fields
+  Widget _buildTextField(TextEditingController controller, IconData icon, String hintText,
+      {bool obscureText = false, TextInputType keyboardType = TextInputType.text}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
         boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
+          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 2)),
         ],
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(

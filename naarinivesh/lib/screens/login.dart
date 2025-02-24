@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'home.dart'; // Replace with your Home Screen file
 import 'signup.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
@@ -13,26 +14,42 @@ class _LoginPageState extends State<LoginPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
   bool _isLoading = false;
 
   void _login() async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showErrorDialog("Please enter both email and password.");
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      // Navigate to HomeScreen after successful login
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-    } on FirebaseAuthException catch (e) {
-      _showErrorDialog(e.message ?? "Login failed. Please try again.");
+      User? user = userCredential.user;
+      if (user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Login Successful!")),
+        );
+
+        // Navigate to Home Page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      _showErrorDialog("Login failed: ${e.toString()}");
     } finally {
       setState(() {
         _isLoading = false;
@@ -80,29 +97,13 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(fontSize: 18, color: Colors.black54),
                   ),
                   const SizedBox(height: 40),
-
-                  // Email Input Field
-                  _buildTextField(_emailController, Icons.email, 'Email', TextInputType.emailAddress),
+                  
+                  _buildTextField(_emailController, Icons.email, 'Email', keyboardType: TextInputType.emailAddress),
+                  const SizedBox(height: 20),
+                  _buildTextField(_passwordController, Icons.lock, 'Password', obscureText: true),
                   const SizedBox(height: 20),
 
-                  // Password Input Field
-                  _buildTextField(_passwordController, Icons.lock, 'Password', TextInputType.text, obscureText: true),
-                  const SizedBox(height: 15),
-
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        // Implement forgot password functionality
-                      },
-                      child: const Text(
-                        'Forgot Password?',
-                        style: TextStyle(color: Colors.purple, fontSize: 14),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
+                  // Login Button
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
@@ -113,14 +114,11 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: _isLoading ? null : _login,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'Login',
-                            style: TextStyle(fontSize: 18),
-                          ),
+                        : const Text('Login', style: TextStyle(fontSize: 18)),
                   ),
                   const SizedBox(height: 20),
 
-                  // Navigate to Sign Up
+                  // Navigate to Signup Page
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -191,7 +189,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   // Helper method for text fields
-  Widget _buildTextField(TextEditingController controller, IconData icon, String hintText, TextInputType keyboardType, {bool obscureText = false}) {
+  Widget _buildTextField(TextEditingController controller, IconData icon, String hintText,
+      {bool obscureText = false, TextInputType keyboardType = TextInputType.text}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -201,6 +200,7 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         decoration: InputDecoration(
