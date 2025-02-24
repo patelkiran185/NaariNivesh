@@ -1,8 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:naarinivesh/constants.dart';
 import 'dart:convert';
+//import 'screens/scenario.dart'; // Import the ScenarioScreen
 
 class CrisisScreen extends StatefulWidget {
   CrisisScreen({Key? key}) : super(key: key);
@@ -23,42 +23,6 @@ class _CrisisScreenState extends State<CrisisScreen> {
     'Natural Disaster': 6,
   };
 
-  Future<void> _sendLevelToBackend(BuildContext context, String level) async {
-    final levelNumber = levelMapping[level];
-    if (levelNumber == null) {
-      print('Invalid level: $level');
-      return;
-    }
-
-    setState(() => isLoading = true); // ✅ Show loading indicator
-
-    final url = Uri.parse('http://${ip}:5000/scenario/$levelNumber');
-    try {
-      final response = await http.get(url, headers: {'Accept': 'application/json'});
-
-      if (response.statusCode == 200) {
-        print('Level started: $level');
-        final responseData = jsonDecode(response.body) as Map<String, dynamic>;
-
-        print('Response: $responseData');
-
-        setState(() => isLoading = false); // ✅ Hide loading indicator
-
-        // ✅ Navigate to scenario screen after loading finishes
-        Navigator.pushNamed(
-          context,
-          '/scenario',
-          arguments: {'level': levelNumber, ...responseData},
-        );
-      } else {
-        setState(() => isLoading = false);
-        print('Error ${response.statusCode}: ${response.body}');
-      }
-    } catch (e) {
-      setState(() => isLoading = false);
-      print('Failed to connect: $e');
-    }
-  }
 
   void _showPopup(BuildContext context, String level) {
     showDialog(
@@ -75,8 +39,11 @@ class _CrisisScreenState extends State<CrisisScreen> {
             TextButton(
               onPressed: () async {
                 Navigator.of(dialogContext).pop(); // Close dialog before navigation
-                await Future.delayed(Duration(milliseconds: 200)); // Short delay
-                _sendLevelToBackend(context, level);
+                Navigator.pushNamed(
+                  context,
+                  '/scenario',
+                  arguments: {'level': levelMapping[level]},
+                );
               },
               child: Text('Start'),
             ),

@@ -1,5 +1,3 @@
-
-
 import base64
 import os
 import requests
@@ -9,6 +7,7 @@ from flask_cors import CORS
 import google.generativeai as genai
 import re
 import json
+
 
 # Load environment variables
 load_dotenv()
@@ -36,16 +35,26 @@ def extract_keywords(text, num_keywords=5):
     words = re.findall(r'\b[A-Za-z]{4,}\b', text)
     return ", ".join(words[:num_keywords])
 
-def generate_image(prompt):
-    """Generate an image using Hugging Face Stable Diffusion and return Base64."""
-    url = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
-    headers = {"Authorization": f"Bearer {os.getenv('HF_API_KEY')}"}
-    data = {"inputs": prompt, "parameters": {"use_cache": False}}
+def generate_image(level):
+    """Generate an image based on the crisis level and return Base64."""
+    image_path = None
 
-    response = requests.post(url, json=data, headers=headers)
+    if level == 1:
+        image_path = "basic_emer1.png"  
+    elif level == 2:
+        image_path = "health_crisis1.png"  
+    elif level == 3:
+        image_path = "job_loss1.jpg"  
+    elif level == 4:
+        image_path = "fin_debt1.jpg"  
+    elif level == 5:
+        image_path = "family_emer1.png"  
+    elif level == 6:
+        image_path = "natural_disas1.png"  
 
-    if response.status_code == 200:
-        return base64.b64encode(response.content).decode("utf-8")  # Convert to Base64
+    if image_path and os.path.exists(image_path):
+        with open(image_path, "rb") as image_file:
+            return base64.b64encode(image_file.read()).decode("utf-8")
     else:
         return None
 
@@ -108,7 +117,7 @@ def get_scenario(level):
 
         # Generate image based on scenario keywords
         keywords = extract_keywords(scenario)
-        image_base64 = generate_image(keywords)  # Get Base64 encoded image
+        image_base64 = generate_image(level)  # Get Base64 encoded image
 
         return jsonify({
             "scenario": scenario,
@@ -144,7 +153,7 @@ def evaluate_choice():
 
     Format your response to the user (this is a crisis readiness planner and everything is a simulation).
     Focus on what they did well and/or how they could improve their response.
-    Keep it breif, educational and encouraging. If the answer is incorrect, kindly suggest they try again."""
+    Keep it very breif, educational and encouraging. If the answer is incorrect, kindly suggest they try again."""
 
     try:
         # Generate response using Gemini
