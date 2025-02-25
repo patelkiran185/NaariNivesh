@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:naarinivesh/screens/mentor_home.dart';
@@ -10,15 +11,8 @@ import 'screens/learner_home.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(MaterialApp(
-    initialRoute: '/login',
-    routes: {
-      '/login': (context) => const LoginPage(),
-      '/signup': (context) => const SignUpPage(),
-      '/learnerHome': (context) => const HomeScreen(),
-      '/mentorHome': (context) => const MentorHomePage(),
-    },
-  ));
+  // await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+  runApp(const MyApp()); 
 }
 
 class MyApp extends StatelessWidget {
@@ -49,9 +43,25 @@ class AuthCheck extends StatelessWidget {
           return const Center(child: CircularProgressIndicator()); // Show loading
         }
         if (snapshot.hasData) {
-          return const HomeScreen(); // If logged in, go to Home
+          return FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance.collection('users').doc(snapshot.data!.uid).get(),
+            builder: (context, userSnapshot) {
+              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (userSnapshot.hasData && userSnapshot.data!.exists) {
+                String role = userSnapshot.data!['role'];
+                if (role == "Mentor") {
+                  return const MentorHomePage();
+                } else {
+                  return const HomeScreen();
+                }
+              }
+              return const WelcomeScreen();
+            },
+          );
         } else {
-          return const WelcomeScreen(); // If not logged in, go to Welcome
+          return const WelcomeScreen();
         }
       },
     );

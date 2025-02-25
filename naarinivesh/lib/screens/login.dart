@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'learner_home.dart';
+import 'package:naarinivesh/main.dart';
 import 'signup.dart';
 
 class LoginPage extends StatefulWidget {
@@ -47,13 +47,10 @@ class _LoginPageState extends State<LoginPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Login Successful!")),
           );
-
-          // Navigate based on role
-          if (role == "Mentor") {
-            Navigator.pushReplacementNamed(context, '/mentorHome');
-          } else {
-            Navigator.pushReplacementNamed(context, '/learnerHome');
-          }
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AuthCheck()),
+          );
         }
       }
     } catch (e) {

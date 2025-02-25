@@ -1,7 +1,26 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:naarinivesh/main.dart';
 
 class MentorHomePage extends StatelessWidget {
   const MentorHomePage({super.key});
+
+
+  void _logout(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+        (route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Logout failed: ${e.toString()}")),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +47,11 @@ class MentorHomePage extends StatelessWidget {
             child: Icon(Icons.person, color: Colors.teal.shade700, size: 20),
           ),
         ),
+        automaticallyImplyLeading: false,
         actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-              icon: Icon(Icons.notifications_outlined, color: Colors.teal.shade700),
-              onPressed: () {}, // Implement notifications
-            ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Color.fromARGB(255, 0, 0, 0)),
+            onPressed: () => _logout(context),
           ),
         ],
       ),
@@ -71,9 +88,9 @@ class MentorHomePage extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
+                          const Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
+                            children: [
                               Text(
                                 'Welcome back,',
                                 style: TextStyle(
